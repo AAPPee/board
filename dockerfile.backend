@@ -1,0 +1,16 @@
+# サーバーサイド（Node.jsアプリケーション）のイメージを指定
+FROM node:14 as server-stage
+
+# コンテナ内の作業ディレクトリを設定
+WORKDIR /app
+
+# サーバーサイドのソースコードをコンテナにコピー
+COPY ./package*.json ./
+RUN npm install
+
+# サーバーサイドのファイルをコンテナにコピー
+COPY . ./
+
+# Node.jsアプリケーションを起動
+EXPOSE 3001
+CMD ["node", "server.js"]

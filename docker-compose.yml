@@ -1,0 +1,14 @@
+version: '3'
+services:
+  frontend:
+    image: board5:latest
+    ports:
+      - "80:80"
+    container_name: react_board
+
+  backend:
+    image: board5back:latest
+    ports:
+      - "3001:3001"
+    container_name: nodejs_board
+

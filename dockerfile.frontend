@@ -1,0 +1,42 @@
+# フロントエンド（Reactアプリケーション）とサーバーサイド（Node.jsアプリケーション）を1つのDockerfileにまとめる
+
+# フロントエンド（Reactアプリケーション）のビルド用イメージを指定
+FROM node:14 as build-stage
+
+# コンテナ内の作業ディレクトリを設定
+WORKDIR /app
+
+# フロントエンドのソースコードをコンテナにコピー
+COPY ./client/package*.json ./
+RUN npm install
+
+# フロントエンドのビルドを行う
+COPY ./client ./
+RUN npm run build
+
+# サーバーサイド（Node.jsアプリケーション）のイメージを指定
+FROM node:14 as server-stage
+
+# コンテナ内の作業ディレクトリを設定
+WORKDIR /app
+
+# サーバーサイドのソースコードをコンテナにコピー
+COPY ./package*.json ./
+RUN npm install
+
+# サーバーサイドのファイルをコンテナにコピー
+COPY . ./
+
+# Node.jsアプリケーションを起動
+EXPOSE 3001
+CMD ["node", "server.js"]
+
+# 本番用の軽量なWebサーバーを指定
+FROM nginx:stable-alpine as production-stage
+
+# フロントエンドのビルド済みのファイルをNginxのデフォルトディレクトリにコピー
+COPY --from=build-stage /app/build /usr/share/nginx/html
+
+# Nginxを起動
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
